@@ -63,16 +63,16 @@
 #define ENABLE_SOFT_LIMIT 1 // uncomment to disable soft limits
 #define AUTO_HOME_STEPS_RATE 1200
 
-#define X_MM_RAIL_LENGTH 740
-#define Y_MM_RAIL_LENGTH 600
-
 #define X_MM_HOMING_OFFSET (-330)
 #define Y_MM_HOMING_OFFSET (-330)
 
-#define Y_MM_MIN_LIMIT (-330)
+#define Y_MM_MIN_LIMIT (-300)
 #define X_MM_MIN_LIMIT (-290)
-#define Y_MM_MAX_LIMIT 330
-#define X_MM_MAX_LIMIT 290
+#define Y_MM_MAX_LIMIT 230
+#define X_MM_MAX_LIMIT 310
+
+#define X_MM_RAIL_LENGTH (-X_MM_MIN_LIMIT + X_MM_MAX_LIMIT)
+#define Y_MM_RAIL_LENGTH (-Y_MM_MIN_LIMIT + Y_MM_MAX_LIMIT)
 
 // AUTO PRINTING
 #define PENDING_TIME (1000000 * 180)
