@@ -93,6 +93,21 @@ void toggle_UV_state(StepperController *stepper_c,int UV_state)
 
 }
 
+void test_movement(StepperController *stepper_c)
+{
+    Serial.println("Test moving");
+    stepper_c->set_steps_rate(500);
+    stepper_c->set_enable(true);
+    for(int i=0;i<(Y_MM_MAX_LIMIT * Y_STEPS_PER_MM);i++)
+    {
+        Serial.println(i);
+        stepper_c->move_step(2, 1);
+        Serial.println(stepper_c->get_steps_count()[Y_AXIS]);
+        delayMicroseconds(500);
+    }
+    Serial.println("Done Test Moving");
+    stepper_c->set_steps_rate(STEPS_RATE);    
+}
 
 void auto_homing(StepperController *stepper_c)
 {
@@ -131,28 +146,23 @@ void auto_homing(StepperController *stepper_c)
     }
 
     stepper_c->set_steps_count(0, 0);
-    stepper_c->set_limits(Y_MM_MAX_LIMIT,Y_MM_MAX_LIMIT,X_MM_MIN_LIMIT, Y_MM_MIN_LIMIT);
+    stepper_c->set_limits(X_MM_MAX_LIMIT,Y_MM_MAX_LIMIT,X_MM_MIN_LIMIT, Y_MM_MIN_LIMIT);
 
     stepper_c->set_steps_rate(STEPS_RATE);
     Serial.println("Auto homing completed successfully! ");
     print_current_position();
+
+    test_movement(stepper_c);
 }
 
-void test_draw(StepperController *stepper_c){
-    stepper_c->set_enable(true);
-    int counter = 0;
-    for(int i = 0; i< 2500; i++){
-      if(counter > 2500){
-        stepper_c->step(3, 0);
-        counter -= 2500;
-      }
-      else{
-        stepper_c->step(1, 0);
-      }
-      counter += 1900;
-      delayMicroseconds(1000);
-    }
-}
+// void test_movement(StepperController *stepper_c){
+//     stepper_c->set_enable(true);
+//     int counter = 0;
+//     for(int i = 0; i< 2500; i++){
+//         stepper_c->move_step(2, 0);
+//         delayMicroseconds(1000);
+//     }
+// }
 
 void print_current_position()
 {
@@ -193,7 +203,7 @@ void setup()
 
 void loop()
 {
-  test_timer = micros();
+    test_timer = micros();
     /** GET INPUT MASK **/
     current_steps_mask = 0;
     current_direction_mask = 0;
@@ -224,6 +234,6 @@ void loop()
     default:
         break;
     }
-   test_timer = micros() - test_timer;
-//   Serial.println(test_timer);
+    test_timer = micros() - test_timer;
+    // Serial.println(test_timer);
 }
