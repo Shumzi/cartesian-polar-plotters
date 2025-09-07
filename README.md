@@ -1,3 +1,5 @@
+[Project Logs](https://docs.google.com/document/d/1Dykp1E0tP4Vg5iNTMWY0Hv9gmuN5yl5A7_C2X_2-8zA/edit?tab=t.0#heading=h.mpouvkfogwal)
+
 # Overview
 The Cartestian and Polar (or Delta) plotters are 2D plotter positioning systems. Each one lets a user draw on a UV sensitive canvas with the UV pen acting as the end effector of the system.  
 
