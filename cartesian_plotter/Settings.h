@@ -83,7 +83,7 @@
 #define Y_STEPS_PER_MM (7.6)
 
 // SOFT LIMITS SETTINGS
-#define ENABLE_SOFT_LIMIT 1 // uncomment to disable soft limits
+// #define ENABLE_SOFT_LIMIT 1 // uncomment to disable soft limits
 #define AUTO_HOME_STEPS_RATE 1200
 
 #define X_MM_HOMING_OFFSET (-330)
