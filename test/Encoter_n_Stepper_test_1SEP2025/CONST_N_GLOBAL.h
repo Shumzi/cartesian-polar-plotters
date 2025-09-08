@@ -4,7 +4,7 @@
 //#define BAUDRATE    (115200)    //
 
 bool Use_Serial = true ; ; //  print to serial (set monitor to same boudrate)
-bool Use_Display = true ; // display on SH106 (make sure Display I2C address and DATA nad Clock conection)  
+bool Use_Display = false ; // display on SH106 (make sure Display I2C address and DATA nad Clock conection)  
 
 const uint32_t Update_Display_Time = 100;// ms - time between display update
 const uint16_t Main_Loop_Delay_Time = 1;// ms - ! Critical value for encoder read pulling. May miss IO change if too small (and/or fast rotating) 
