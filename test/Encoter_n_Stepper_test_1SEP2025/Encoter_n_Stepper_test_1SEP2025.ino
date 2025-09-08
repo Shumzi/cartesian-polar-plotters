@@ -73,6 +73,7 @@ void loop() {
   Update_Encoder_A_Count();
   if(Old_Encoder_A_Count != Current_Encoder_A_Count)
   {   
+    print_step();
     stepper1.moveTo(Current_Encoder_A_Count);
     Old_Encoder_A_Count = Current_Encoder_A_Count;
   }
@@ -82,6 +83,7 @@ void loop() {
   Update_Encoder_B_Count();
   if(Old_Encoder_B_Count != Current_Encoder_B_Count)
   {   
+    print_step();
     stepper1.moveTo(Current_Encoder_B_Count);
     Old_Encoder_B_Count = Current_Encoder_B_Count;
   }
