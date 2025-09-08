@@ -5,11 +5,11 @@
 // The X Stepper pins
 #define STEPPER1_DIR_PIN 2
 #define STEPPER1_STEP_PIN 5
-#define STEPPER1_U_STEP 4
+#define STEPPER1_U_STEP 1
 // The Y stepper pins
 #define STEPPER2_DIR_PIN 3
 #define STEPPER2_STEP_PIN 6
-#define STEPPER2_U_STEP 4
+#define STEPPER2_U_STEP 1
 
 #define ENC_TO_STEP_MULT 8
 #define MINIMAL_MS_UPDATE_TARGET  10
@@ -21,8 +21,8 @@ int new_target = 0;
 const byte numChars = 32;
 char receivedChars[numChars];
 boolean newData = false;
-const int max_speed = 1500;
-const int acceleration = 1000;
+const int max_speed = 2000;
+const int acceleration = 300;
 
 
 
@@ -45,17 +45,17 @@ void onEb2Clicked(EncoderButton& eb) {
  * A function to handle the 'encoder' event
  */
 void onEb1Encoder(EncoderButton& eb) {
-    //Serial.print("eb1 position is: ");
-    //Serial.println(eb.position());
-    stepper1.moveTo(eb.position() * ENC_TO_STEP_MULT * STEPPER1_U_STEP); 
+    Serial.print("eb1 position is: ");
+    Serial.println(eb.position());
+    // stepper1.moveTo(eb.position() * ENC_TO_STEP_MULT * STEPPER1_U_STEP); 
 
     
 }
 
 void onEb2Encoder(EncoderButton& eb) {
-    //Serial.print("eb2 position is: ");
-    //Serial.println(eb.position());
-    stepper2.moveTo(eb.position() * ENC_TO_STEP_MULT * STEPPER2_U_STEP);
+    Serial.print("eb2 position is: ");
+    Serial.println(eb.position());
+    // stepper2.moveTo(eb.position() * ENC_TO_STEP_MULT * STEPPER2_U_STEP);
 }
 
 
@@ -66,7 +66,8 @@ void setup() {
   eb1.setEncoderHandler(onEb1Encoder);
   eb2.setClickHandler(onEb2Clicked);
   eb2.setEncoderHandler(onEb2Encoder);
-
+  eb1.useQuadPrecision(true);
+  eb2.useQuadPrecision(true);
   stepper1.setMaxSpeed(max_speed * STEPPER1_U_STEP);
   stepper1.setAcceleration(2000.0 * STEPPER1_U_STEP);
     

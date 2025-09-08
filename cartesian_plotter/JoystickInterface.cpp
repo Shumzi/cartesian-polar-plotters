@@ -19,14 +19,14 @@ void Encoder::initialize_encoder(){
 bool Encoder::is_pressed_ = 0;
   
 int Encoder::read_encoder(){
-   if(micros() - time_stamp_ > ENCODER_READ_INTERVAL){
-     time_stamp_ = micros();
-//     delay(3);
-     prev_encoder_read_ = new_encoder_read_ ;
-     new_encoder_read_ = (((digitalRead(bit_1_pin_)) << 1) + (digitalRead(bit_0_pin_))) ;
-     byte check_direction  = (prev_encoder_read_ << 2) + new_encoder_read_  ; // x4 = 2 rotate left 
-     switch (check_direction)
-     {
+  if(micros() - time_stamp_ > ENCODER_READ_INTERVAL){
+    time_stamp_ = micros();
+    //     delay(3);
+    prev_encoder_read_ = new_encoder_read_ ;
+    new_encoder_read_ = (((digitalRead(bit_1_pin_)) << 1) + (digitalRead(bit_0_pin_))) ;
+    byte check_direction  = (prev_encoder_read_ << 2) + new_encoder_read_  ; // x4 = 2 rotate left 
+    switch (check_direction) // see https://commons.wikimedia.org/wiki/File:Incremental_directional_encoder.gif
+    {
       case 1: case 7: case 8: case 14:
       counter_++;
       return 1 ;
@@ -39,8 +39,7 @@ int Encoder::read_encoder(){
       return 0 ; // 
     }
   }
-    
-   return 0;
+  return 0;
 }
 
 void Encoder::set_direction(){
@@ -100,7 +99,7 @@ void read_encoder_long_press(Encoder &encoder_a, Encoder &encoder_b, int *UV_sta
 
 void getMovementMask(int *current_steps_mask, int *current_direction_mask,int *UV_state, Encoder &encoder_a, Encoder &encoder_b)
 {
-  // read and update the encoders cunter at each iteration  
+  // read and update the encoders counter at each iteration  
   encoder_a.read_encoder();
   encoder_b.read_encoder();
 
@@ -111,9 +110,6 @@ void getMovementMask(int *current_steps_mask, int *current_direction_mask,int *U
   else{
     read_encoder_long_press(encoder_a,encoder_b, UV_state); // case 2: we want that pen_on will be applyed only when pressing
   }
-  
-  
-  
   
   *current_steps_mask = 0;
   *current_direction_mask = 0;

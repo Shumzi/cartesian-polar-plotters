@@ -19,7 +19,6 @@ int current_drawing = 0;
 Encoder encoder_a = Encoder(ENCODER_A_BIT_0, ENCODER_A_BIT_1, ENCODER_A_BUTTON,'A');
 Encoder encoder_b = Encoder(ENCODER_B_BIT_0, ENCODER_B_BIT_1, ENCODER_B_BUTTON,'B');
 unsigned long test_timer = 0;
-//int UV_state = UV_OFF;
 int UV_state = UV_OFF;
 
 
@@ -30,19 +29,11 @@ void state_handler(int current_steps_mask, int UV_state, StepperController *step
     {
 
         stepper_c->set_enable(true);
-        if (state.sys_mode == IDLE)
-        {
-            state.sys_mode = MOVE;
-            // toggle_led(true); // turn led on
-        }
+        state.sys_mode = MOVE;
         state.last_move_time_stamp = micros();
     }
-    else if (state.sys_mode == MOVE && (micros() - state.last_move_time_stamp) > PEN_DEBOUNCE_TIME)
-    {
+    else
         state.sys_mode = IDLE;
-        // stepper_c->set_enable(false);
-        // toggle_led(false); // turn led off
-    }
 }
 
 void toggle_UV_state(StepperController *stepper_c,int UV_state)
@@ -79,7 +70,6 @@ void auto_homing(StepperController *stepper_c)
     Serial.println("Auto homing! ");
     stepper_c->set_steps_rate(AUTO_HOME_STEPS_RATE);
     stepper_c->set_enable(true);
-    // stepper_c->set_UV_value(UV_OFF);
     stepper_c->set_UV_value(UV_OFF);
 
     stepper_c->set_steps_count(mm_to_steps((X_MM_RAIL_LENGTH), X_STEPS_PER_MM), 0);
@@ -135,10 +125,7 @@ void setup()
     Serial.begin(115200);
     /** Init Joystick input pins **/
     /** AUTO HOME**/
-    //pen_controller.attach(SERVO_COMMAND_PIN);
-
     auto_homing(&stepper_c);
-    // test_draw(&stepper_c);
     state.sys_mode = IDLE;
     pinMode (UV_PIN, OUTPUT);
 }
