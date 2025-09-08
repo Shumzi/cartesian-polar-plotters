@@ -29,7 +29,7 @@
 #include <Servo.h>
 Servo myservo;  // create servo object to control a servo
 const int max_speed = 2000;
-const int acceleration = 1000;
+const int acceleration = 10;
 bool uv_state = false;
 AccelStepper stepper1(AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN);
 AccelStepper stepper2(AccelStepper::DRIVER, STEPPER2_STEP_PIN, STEPPER2_DIR_PIN);
@@ -54,10 +54,10 @@ void setup() {
 //  digitalWrite(STEPPER_EN_PIN, LOW);// enable motors, in this code motors consume current all time.     
 
   stepper1.setMaxSpeed(max_speed * STEPPER1_U_STEP);
-  stepper1.setAcceleration(2000.0 * STEPPER1_U_STEP);
+  stepper1.setAcceleration(acceleration * STEPPER1_U_STEP);
     
   stepper2.setMaxSpeed(max_speed * STEPPER2_U_STEP);
-  stepper2.setAcceleration(2000.0 * STEPPER2_U_STEP);
+  stepper2.setAcceleration(acceleration * STEPPER2_U_STEP);
 
 //  update_rates();
   Current_Time = millis();
@@ -66,6 +66,7 @@ void setup() {
 //   Homming();
   set_steps(0,0);// set (define) current (steps) position 
   //set_position(0, 0, 0);
+  stepper1.moveTo(2000);
  
  myservo.attach(SERVO_CONTROL_IO);  // attaches the servo on pin SERVO_CONTROL_IO to the servo object 
 }
@@ -85,7 +86,7 @@ void loop() {
   if(Old_Encoder_B_Count != Current_Encoder_B_Count)
   {   
     // print_step();
-    stepper2.moveTo(Current_Encoder_B_Count);
+    stepper2.moveTo(Current_Encoder_B_Count * STEPPER2_U_STEP);
     Old_Encoder_B_Count = Current_Encoder_B_Count;
   }
   read_SW();

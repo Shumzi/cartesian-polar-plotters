@@ -2,20 +2,15 @@
 #include "StepperController.h"
 #include "JoystickInterface.h"
 #include "Settings.h"
-#include <AccelStepper.h>
 // DEFINITIONS:
 void print_current_position();
 
 sys_state state = {IDLE, micros()};
-//Servo pen_controller;
-// StepperController stepper_c = StepperController();
-AccelStepper stepper1(AccelStepper::DRIVER, X_STEP_PIN, X_DIR_PIN);
-AccelStepper stepper2(AccelStepper::DRIVER, Y_STEP_PIN, Y_DIR_PIN);
-
+StepperController stepper_c = StepperController();
 int current_steps_mask = 0;
 int current_direction_mask = 0;
 int target[N_INSTRUCTIONS] = {0, 0, 0};
-// const int *current_position = stepper_c.get_steps_count();
+const int *current_position = stepper_c.get_steps_count();
 int current_drawing = 0;
 
 // USER INTERFACE OBJECTS
@@ -128,14 +123,7 @@ void setup()
     Serial.begin(115200);
     /** Init Joystick input pins **/
     /** AUTO HOME**/
-    // auto_homing(&stepper_c);
-    const int max_speed = 2000;
-    stepper1.setMaxSpeed(max_speed);
-    stepper1.setAcceleration(2000.0);
-
-    stepper2.setMaxSpeed(max_speed);
-    stepper2.setAcceleration(2000.0);
-
+    auto_homing(&stepper_c);
     test_movement(&stepper_c);
     state.sys_mode = IDLE;
     pinMode (UV_PIN, OUTPUT);
@@ -157,8 +145,7 @@ void loop()
     {
     case MOVE:
         toggle_UV_state(&stepper_c, UV_state);
-        stepper1
-        // stepper_c.move_step(current_steps_mask, current_direction_mask);
+        stepper_c.move_step(current_steps_mask, current_direction_mask);
         break;
     case IDLE:
         if(micros() - state.last_move_time_stamp > PEN_PENDING_TIME && stepper_c.get_UV_value() == UV_ON ){
