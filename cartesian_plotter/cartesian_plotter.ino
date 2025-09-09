@@ -1,119 +1,85 @@
 #include <Arduino.h>
-#include "StepperController.h"
+#include <AccelStepper.h>
 #include "JoystickInterface.h"
 #include "Settings.h"
 // DEFINITIONS:
 void print_current_position();
 
-sys_state state = {IDLE, micros()};
-StepperController stepper_c = StepperController();
-int current_steps_mask = 0;
-int current_direction_mask = 0;
-int target[N_INSTRUCTIONS] = {0, 0, 0};
-const int *current_position = stepper_c.get_steps_count();
-int current_drawing = 0;
+AccelStepper stepper_x(AccelStepper::DRIVER, X_STEP_PIN, X_DIR_PIN);
+AccelStepper stepper_y(AccelStepper::DRIVER, Y_STEP_PIN, Y_DIR_PIN);
+int current_x_pos = 0;
+int current_y_pos = 0;
 
 // USER INTERFACE OBJECTS
-Encoder encoder_a = Encoder(ENCODER_A_BIT_0, ENCODER_A_BIT_1, ENCODER_A_BUTTON,'A');
-Encoder encoder_b = Encoder(ENCODER_B_BIT_0, ENCODER_B_BIT_1, ENCODER_B_BUTTON,'B');
-unsigned long test_timer = 0;
-int UV_state = UV_OFF;
 
+Encoder encoder_x = Encoder(ENCODER_A_BIT_0, ENCODER_A_BIT_1, ENCODER_A_BUTTON,'A', X_MAX_LIMIT, X_MIN_LIMIT);
+Encoder encoder_y = Encoder(ENCODER_B_BIT_0, ENCODER_B_BIT_1, ENCODER_B_BUTTON,'B', Y_MAX_LIMIT, Y_MIN_LIMIT);
+unsigned long time_last_action = 0;
+bool uv_state = LOW;
 
-void state_handler(int current_steps_mask, int UV_state, StepperController *stepper_c)
+void cartesian_auto_homing()
 {
-    // if movement was deteced
-    if (current_steps_mask ||  UV_state)
-    {
-
-        stepper_c->set_enable(true);
-        state.sys_mode = MOVE;
-        state.last_move_time_stamp = micros();
-    }
-    else
-        state.sys_mode = IDLE;
+    Serial.println("homing");
+    Serial.print("stepper_X loc");
+    Serial.println(stepper_x.currentPosition());
+    // pin to left
+    stepper_x.moveTo(stepper_x.currentPosition() - (X_MAX_LIMIT + 100 - X_MIN_LIMIT) * STEPPER_X_STEPSIZE);
+    float acc = stepper_x.acceleration();
+    float max_speed = stepper_x.maxSpeed();
+    stepper_x.setAcceleration(100);
+    stepper_x.setMaxSpeed(1000);
+    stepper_x.runToPosition();
+    // move to middle
+    stepper_x.setAcceleration(acc);
+    stepper_x.setMaxSpeed(max_speed);
+    stepper_x.moveTo(stepper_x.currentPosition() + X_HOMING_OFFSET * STEPPER_X_STEPSIZE);
+    stepper_x.runToPosition();
+    Serial.println("moved x");
+    // move to bottom
+    stepper_y.disableOutputs();
+    Serial.println("disabled y");
+    delay(2000);
+    stepper_y.enableOutputs();
+    Serial.println("enabled y");
+    // move to middle
+    stepper_y.moveTo(stepper_y.currentPosition() + Y_HOMING_OFFSET * STEPPER_Y_STEPSIZE);
+    stepper_y.runToPosition();
+    stepper_x.setCurrentPosition(0);
+    stepper_y.setCurrentPosition(0);
 }
 
-void toggle_UV_state(StepperController *stepper_c,int UV_state)
+void move_to_switch (AccelStepper as, int pin_no)
 {
-  if(UV_state){
-    int new_val = UV_ON;
-    if(stepper_c->get_UV_value() == UV_ON){
-      new_val = UV_OFF;
+    float acc = as.acceleration();
+    float max_speed = as.maxSpeed();
+    as.setAcceleration(500);
+    as.setMaxSpeed(500);
+    as.moveTo(-5000);
+    while(digitalRead(pin_no))
+    {
+        as.run();
     }
-    stepper_c->set_UV_value(new_val);
-    print_current_position();
-  }
+    as.setCurrentPosition(0);
+    as.moveTo(0);
+    as.setAcceleration(acc);
+    as.setMaxSpeed(max_speed);
 
 }
-
-void test_movement(StepperController *stepper_c)
+void polar_extra_setup_and_auto_homing()
 {
-    Serial.println("Test moving");
-    stepper_c->set_steps_rate(500);
-    stepper_c->set_enable(true);
-    for(int i=0;i<(Y_MM_MAX_LIMIT * Y_STEPS_PER_MM);i++)
-    {
-        Serial.println(i);
-        stepper_c->move_step(2, 1);
-        Serial.println(stepper_c->get_steps_count()[Y_AXIS]);
-        delayMicroseconds(500);
-    }
-    Serial.println("Done Test Moving");
-    stepper_c->set_steps_rate(STEPS_RATE);    
-}
-
-void auto_homing(StepperController *stepper_c)
-{
-    Serial.println("Auto homing! ");
-    stepper_c->set_steps_rate(AUTO_HOME_STEPS_RATE);
-    stepper_c->set_enable(true);
-    stepper_c->set_UV_value(UV_OFF);
-
-    stepper_c->set_steps_count(mm_to_steps((X_MM_RAIL_LENGTH), X_STEPS_PER_MM), 0);
-
-    // Move X to 0    
-    while (stepper_c->get_steps_count()[X_AXIS] > 0)
-    {
-        stepper_c->move_step(1, 1);
-    }
-    Serial.println("Moved X axis to place.");
-
-    // Move Y to 0 by using disable (gravity will drop the axis bottle to 0)
-    const unsigned long current_time = millis();
-    while(millis() - current_time < 1500 ){
-      stepper_c->set_enable(false);
-    }
-    Serial.println("Moved Y axis to place.");
-    stepper_c->set_steps_count(int(mm_to_steps(X_MM_HOMING_OFFSET, X_STEPS_PER_MM)), int(mm_to_steps(Y_MM_HOMING_OFFSET, Y_STEPS_PER_MM))); 
+    pinMode(X_LIMIT_SW_PIN, INPUT_PULLUP);
+    pinMode(Y_LIMIT_SW_PIN, INPUT_PULLUP);
+    move_to_switch(stepper_x, X_LIMIT_SW_PIN);
+    move_to_switch(stepper_y, Y_LIMIT_SW_PIN);
     
-    // Move head to center of the board 
-    stepper_c->set_enable(true);
-    while (stepper_c->get_steps_count()[X_AXIS] < 0 )
-    {
-        stepper_c->move_step(1, 0);
-    }
-    while (stepper_c->get_steps_count()[Y_AXIS] < 0 )
-    {
-        stepper_c->move_step(2, 0);
-    }
-
-    stepper_c->set_steps_count(0, 0);
-    stepper_c->set_limits(X_MM_MAX_LIMIT,Y_MM_MAX_LIMIT,X_MM_MIN_LIMIT, Y_MM_MIN_LIMIT);
-
-    stepper_c->set_steps_rate(STEPS_RATE);
-    Serial.println("Auto homing completed successfully! ");
-    print_current_position();
-
-    test_movement(stepper_c);
 }
 
 void print_current_position()
 {
     Serial.println("Position: ");
-    Serial.print(stepper_c.get_steps_count()[X_AXIS]);
+    Serial.print(stepper_x.currentPosition());
     Serial.print(",");
-    Serial.println(stepper_c.get_steps_count()[Y_AXIS]);
+    Serial.println(stepper_y.currentPosition());
 
 }
 
@@ -123,38 +89,92 @@ void setup()
     Serial.begin(115200);
     /** Init Joystick input pins **/
     /** AUTO HOME**/
-    auto_homing(&stepper_c);
-    test_movement(&stepper_c);
-    state.sys_mode = IDLE;
+    // auto_homing(&stepper_c);
     pinMode (UV_PIN, OUTPUT);
+    
+    stepper_x.setMaxSpeed(X_MAX_SPEED * STEPPER_X_STEPSIZE);
+    stepper_x.setAcceleration(X_ACCELERATION * STEPPER_X_STEPSIZE);
+
+    stepper_y.setMaxSpeed(Y_MAX_SPEED * STEPPER_Y_STEPSIZE);
+    stepper_y.setAcceleration(Y_ACCELERATION * STEPPER_Y_STEPSIZE);
+    stepper_y.setEnablePin(EN_PIN);
+    stepper_y.setPinsInverted(false,false,true);
+    stepper_y.enableOutputs();
+    if(SYSTEM_TYPE == "cartesian")
+        cartesian_auto_homing();
+    else if(SYSTEM_TYPE == "polar")
+        polar_extra_setup_and_auto_homing();
+
+}
+void update_UV(Encoder enc_1, Encoder enc_2)
+{
+    static bool was_pressed = false;
+
+    if(enc_1.is_pressed() || enc_2.is_pressed())
+    {
+        if(!was_pressed)
+        {
+            uv_state = !uv_state;
+            digitalWrite (UV_PIN, uv_state); 
+            time_last_action = micros();
+        }
+        was_pressed = true;
+    }
+    else
+        was_pressed = false;
+}
+
+void maybe_print(Encoder enc)
+{
+    static bool is_pressed = false;
+    if(enc.is_pressed())
+    {
+        if(!is_pressed)
+        {
+            Serial.print("Encoder X Count: ");
+            Serial.println(current_x_pos);
+            Serial.print(", Encoder Y Count: ");
+            Serial.println(current_y_pos);
+        }
+        is_pressed = true;
+    }
+    else
+    {
+        is_pressed = false;
+    }
 }
 
 void loop()
 {
-    test_timer = micros();
-    /** GET INPUT MASK **/
-    current_steps_mask = 0;
-    current_direction_mask = 0;
-    UV_state = 0;
-    
-    getMovementMask(&current_steps_mask,&current_direction_mask, &UV_state, encoder_a,encoder_b);
-    
-    state_handler(current_steps_mask, UV_state, &stepper_c);
+    int new_x_pos = encoder_x.read_encoder();
+    int new_y_pos = encoder_y.read_encoder();
 
-    switch (state.sys_mode)
-    {
-    case MOVE:
-        toggle_UV_state(&stepper_c, UV_state);
-        stepper_c.move_step(current_steps_mask, current_direction_mask);
-        break;
-    case IDLE:
-        if(micros() - state.last_move_time_stamp > PEN_PENDING_TIME && stepper_c.get_UV_value() == UV_ON ){
-            toggle_UV_state(&stepper_c, true);
-        }
-        break;
-    default:
-        break;
+    update_UV(encoder_x, encoder_y);
+
+    // calculate move X
+    if(current_x_pos != new_x_pos && new_x_pos > X_MIN_LIMIT + 5 && new_x_pos < X_MAX_LIMIT - 5)
+    {   
+        stepper_x.moveTo(new_x_pos * STEPPER_X_STEPSIZE);
+        current_x_pos = new_x_pos;
+        time_last_action = micros();
     }
-    test_timer = micros() - test_timer;
-    // Serial.println(test_timer);
+    
+    // calculate move Y
+    if(current_y_pos != new_y_pos && new_y_pos > Y_MIN_LIMIT + 5 && new_y_pos < Y_MAX_LIMIT - 5)
+    {   
+        stepper_y.moveTo(new_y_pos * STEPPER_X_STEPSIZE);
+        current_y_pos = new_y_pos;
+        time_last_action = micros();
+    }
+    
+    // turn off LED if idle.
+    if (uv_state && ((micros() - time_last_action) > PEN_PENDING_TIME))
+    {
+        uv_state = LOW;
+        digitalWrite (UV_PIN, uv_state);
+        time_last_action = micros();
+    }
+    // update steppers.
+    stepper_x.run();
+    stepper_y.run();
 }
