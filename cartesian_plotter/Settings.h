@@ -1,3 +1,29 @@
+// 
+/*==========Arduino Nano pinout====== 
+ * IO map see J:\Amir Design\PCB_Design\EASYEDA JLBPCB\projects\SHIELD_V4\Shield_Amir_Shalev_V_0_0
+ * Encoder A - Left, B-right 
+ *                      _______
+ *                 TXD-|       |-Vin 
+ *                 RXD-|       |-Gnd to Display  
+ *                 RST-|       |-RST
+ *  To Encoders    GND-|       |-+5V To Display
+ *                  D2-|       |-A7
+ *                  D3-|       |-A6
+ *                  D4-|       |-A5 SCL (to Display) 
+ *                  D5-|       |-A4 SDA (to Display)
+ *                  D6-|       |-A3 (D17) Encoder B Switch 
+ *                  D7-|       |-A2 (D16) Encoder A Switch
+ *                  D8-|       |-A1 (D15) Encoder B bit 0
+ *  Encoder A bit 1 D9-|       |-A0 (D14) Encoder A bit 0 , mark Abort 
+ *                 D10-|       |-Ref
+ *                 D11-|       |-3.3V   
+ * Encoder B bit 1 D12-|       |-D13
+ *                      --USB--          
+ *                     
+ * ! Nano can use only D2, D3 as interupt -  encoder B must read by pulling                      
+ * Mechanical encoder like https://www.aliexpress.com/item/1005005239756119.html 
+ */ 
+
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
@@ -11,9 +37,6 @@
 #define bit_istrue(x, mask) ((x & mask) != 0)
 #define bit_to_sign(x, mask) (((x & mask) != 0) ? -1 : 1)
 #define DIRECTION_INVERT_MASK 3
-
-// SERVO
-#define PEN_DEBOUNCE_TIME 300
 
 // STEPERS CONFIGURATIONS
 #define X_STEP_PIN 5
@@ -63,16 +86,16 @@
 #define ENABLE_SOFT_LIMIT 1 // uncomment to disable soft limits
 #define AUTO_HOME_STEPS_RATE 1200
 
-#define X_MM_RAIL_LENGTH 740
-#define Y_MM_RAIL_LENGTH 600
-
 #define X_MM_HOMING_OFFSET (-330)
 #define Y_MM_HOMING_OFFSET (-330)
 
-#define Y_MM_MIN_LIMIT (-330)
+#define Y_MM_MIN_LIMIT (-300)
 #define X_MM_MIN_LIMIT (-290)
-#define Y_MM_MAX_LIMIT 330
-#define X_MM_MAX_LIMIT 290
+#define Y_MM_MAX_LIMIT 230
+#define X_MM_MAX_LIMIT 310
+
+#define X_MM_RAIL_LENGTH (-X_MM_MIN_LIMIT + X_MM_MAX_LIMIT)
+#define Y_MM_RAIL_LENGTH (-Y_MM_MIN_LIMIT + Y_MM_MAX_LIMIT)
 
 // AUTO PRINTING
 #define PENDING_TIME (1000000 * 180)
