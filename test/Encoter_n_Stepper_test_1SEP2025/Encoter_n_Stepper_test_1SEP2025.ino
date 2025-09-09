@@ -29,7 +29,7 @@
 #include <Servo.h>
 Servo myservo;  // create servo object to control a servo
 const int max_speed = 2000;
-const int acceleration = 10;
+const int acceleration = 1000;
 bool uv_state = false;
 AccelStepper stepper1(AccelStepper::DRIVER, STEPPER1_STEP_PIN, STEPPER1_DIR_PIN);
 AccelStepper stepper2(AccelStepper::DRIVER, STEPPER2_STEP_PIN, STEPPER2_DIR_PIN);
