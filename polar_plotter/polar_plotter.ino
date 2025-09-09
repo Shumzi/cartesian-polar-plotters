@@ -55,18 +55,6 @@ void state_handler(int current_steps_mask, int UV_state, StepperController *step
   }
 }
 
-// void toggle_UV_state(StepperController *stepper_c,int UV_state)
-// {
-//   if(UV_state){
-//     int new_val = UV_ON;
-//     if(stepper_c->get_servo_value() == UV_ON){
-//       new_val = UV_OFF;
-//     }
-//     stepper_c->set_servo_value(new_val);
-//   }
-
-// }
-
 void toggle_UV_state(StepperController *stepper_c, int UV_state) {
   if (UV_state) {
     int new_val = UV_ON;

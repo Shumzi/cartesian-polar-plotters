@@ -69,8 +69,14 @@ void polar_extra_setup_and_auto_homing()
 {
     pinMode(X_LIMIT_SW_PIN, INPUT_PULLUP);
     pinMode(Y_LIMIT_SW_PIN, INPUT_PULLUP);
+    stepper_x.moveTo(3000);
+    stepper_x.runToPosition();
+    stepper_y.moveTo(3000);
+    stepper_y.runToPosition();
     move_to_switch(stepper_x, X_LIMIT_SW_PIN);
     move_to_switch(stepper_y, Y_LIMIT_SW_PIN);
+    stepper_x.setCurrentPosition(0);
+    stepper_y.setCurrentPosition(0);
     
 }
 
@@ -106,28 +112,28 @@ void setup()
         polar_extra_setup_and_auto_homing();
 
 }
-void update_UV(Encoder enc_1, Encoder enc_2)
-{
-    static bool was_pressed = false;
+// void update_UV(Encoder enc_1, Encoder enc_2)
+// {
+//     static bool was_pressed = false;
 
-    if(enc_1.is_pressed() || enc_2.is_pressed())
-    {
-        if(!was_pressed)
-        {
-            uv_state = !uv_state;
-            digitalWrite (UV_PIN, uv_state); 
-            time_last_action = micros();
-        }
-        was_pressed = true;
-    }
-    else
-        was_pressed = false;
-}
+//     if(enc_1.is_pressed() || enc_2.is_pressed())
+//     {
+//         if(!was_pressed)
+//         {
+//             uv_state = !uv_state;
+//             digitalWrite (UV_PIN, uv_state); 
+//             time_last_action = micros();
+//         }
+//         was_pressed = true;
+//     }
+//     else
+//         was_pressed = false;
+// }
 
-void maybe_print(Encoder enc)
+void print_when_press(Encoder enc_1, Encoder enc_2)
 {
     static bool is_pressed = false;
-    if(enc.is_pressed())
+    if(enc_1.is_pressed() || enc_2.is_pressed())
     {
         if(!is_pressed)
         {
@@ -143,20 +149,39 @@ void maybe_print(Encoder enc)
         is_pressed = false;
     }
 }
+void update_uv_movement()
+{
+    time_last_action = micros();
+    if(!uv_state)
+    {
+        uv_state = HIGH;
+        digitalWrite (UV_PIN, uv_state);
+    }
+}
 
+void check_idle()
+{
+    if (uv_state && ((micros() - time_last_action) > PEN_PENDING_TIME))
+    {
+        uv_state = LOW;
+        digitalWrite (UV_PIN, uv_state);
+        time_last_action = micros();
+    }
+}
 void loop()
 {
     int new_x_pos = encoder_x.read_encoder();
     int new_y_pos = encoder_y.read_encoder();
 
-    update_UV(encoder_x, encoder_y);
+    // update_UV(encoder_x, encoder_y);
+    print_when_press(encoder_x, encoder_y);
 
     // calculate move X
     if(current_x_pos != new_x_pos && new_x_pos > X_MIN_LIMIT + 5 && new_x_pos < X_MAX_LIMIT - 5)
     {   
         stepper_x.moveTo(new_x_pos * STEPPER_X_STEPSIZE);
         current_x_pos = new_x_pos;
-        time_last_action = micros();
+        update_uv_movement();
     }
     
     // calculate move Y
@@ -164,16 +189,12 @@ void loop()
     {   
         stepper_y.moveTo(new_y_pos * STEPPER_X_STEPSIZE);
         current_y_pos = new_y_pos;
-        time_last_action = micros();
+        update_uv_movement();
     }
     
     // turn off LED if idle.
-    if (uv_state && ((micros() - time_last_action) > PEN_PENDING_TIME))
-    {
-        uv_state = LOW;
-        digitalWrite (UV_PIN, uv_state);
-        time_last_action = micros();
-    }
+    check_idle();
+
     // update steppers.
     stepper_x.run();
     stepper_y.run();

@@ -27,7 +27,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
-#define SYSTEM_TYPE "cartesian"
+#define SYSTEM_TYPE "polar"
 // Instructions indices
 #define X_AXIS 0
 #define Y_AXIS 1
@@ -44,10 +44,15 @@
 #define Y_STEP_PIN 6
 #define X_DIR_PIN 2
 #define Y_DIR_PIN 3
-#define X_MAX_SPEED 3000
+// #define X_MAX_SPEED 3000
+// #define Y_MAX_SPEED 2000
+// #define X_ACCELERATION 1500
+// #define Y_ACCELERATION 1000
+// #define POLAR_MAX_SPEED 2000
+#define X_MAX_SPEED 2000
 #define Y_MAX_SPEED 2000
-#define X_ACCELERATION 1500
-#define Y_ACCELERATION 1000
+#define X_ACCELERATION 500
+#define Y_ACCELERATION 500
 #define EN_PIN 8
 
 // LIMIT SWITCHES
@@ -77,29 +82,29 @@
 
 // SOFT LIMITS SETTINGS
 // #define ENABLE_SOFT_LIMIT 1 // uncomment to disable soft limits
-#define AUTO_HOME_STEPS_RATE 1200
 
+// cartesian offset
 #define X_HOMING_OFFSET 900
 #define Y_HOMING_OFFSET (-550)
 // mini setup of xy 
-// #define X_HOMING_OFFSET 90
-// #define Y_HOMING_OFFSET (-55)
+// #define X_HOMING_OFFSET 250
+// #define Y_HOMING_OFFSET (-200)
 
 //polar dims
 #define Y_MIN_LIMIT (-5000)
 #define X_MIN_LIMIT (-8500)
 #define Y_MAX_LIMIT 5000
-#define X_MAX_LIMIT 7800
+#define X_MAX_LIMIT 1000
 // cartesian dimensions
 // #define Y_MIN_LIMIT (-500)
 // #define X_MIN_LIMIT (-850)
 // #define Y_MAX_LIMIT 500
 // #define X_MAX_LIMIT 780
 // dims for mini setup of XY
-// #define Y_MIN_LIMIT (-50)
-// #define X_MIN_LIMIT (-85)
-// #define Y_MAX_LIMIT 50
-// #define X_MAX_LIMIT 78
+// #define Y_MIN_LIMIT (-200)
+// #define X_MIN_LIMIT (-250)
+// #define Y_MAX_LIMIT 200
+// #define X_MAX_LIMIT 250
 #define STEPPER_X_STEPSIZE 4
 #define STEPPER_Y_STEPSIZE 4
 
