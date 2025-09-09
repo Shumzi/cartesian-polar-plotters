@@ -112,23 +112,6 @@ void setup()
         polar_extra_setup_and_auto_homing();
 
 }
-// void update_UV(Encoder enc_1, Encoder enc_2)
-// {
-//     static bool was_pressed = false;
-
-//     if(enc_1.is_pressed() || enc_2.is_pressed())
-//     {
-//         if(!was_pressed)
-//         {
-//             uv_state = !uv_state;
-//             digitalWrite (UV_PIN, uv_state); 
-//             time_last_action = micros();
-//         }
-//         was_pressed = true;
-//     }
-//     else
-//         was_pressed = false;
-// }
 
 void print_when_press(Encoder enc_1, Encoder enc_2)
 {
