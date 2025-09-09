@@ -28,7 +28,9 @@ class Encoder{
   int prev_counter_;
   int direction_;
   int steps_to_move_;
-  Encoder(int bit_0_pin,int bit_1_pin,int push_button_pin, char encoder_char);
+  const int max_val;
+  const int min_val;
+  Encoder(int bit_0_pin,int bit_1_pin,int push_button_pin, char encoder_char, int max_val, int min_val);
   
 /**
   * read the encoders' current value. 

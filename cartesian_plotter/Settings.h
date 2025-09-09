@@ -27,6 +27,7 @@
 #ifndef SETTINGS_H
 #define SETTINGS_H
 
+#define SYSTEM_TYPE "cartesian"
 // Instructions indices
 #define X_AXIS 0
 #define Y_AXIS 1
@@ -43,11 +44,15 @@
 #define Y_STEP_PIN 6
 #define X_DIR_PIN 2
 #define Y_DIR_PIN 3
+#define X_MAX_SPEED 3000
+#define Y_MAX_SPEED 2000
+#define X_ACCELERATION 1500
+#define Y_ACCELERATION 1000
 #define EN_PIN 8
 
 // LIMIT SWITCHES
-#define X_LIMIT_SW_PIN 9
-#define Y_LIMIT_SW_PIN 10
+#define X_LIMIT_SW_PIN 10
+#define Y_LIMIT_SW_PIN 11
 
 // ENCODERS PINS
 #define ENCODER_A_BIT_1 (A0) // input IO for gray code bit 0 
@@ -58,13 +63,7 @@
 #define ENCODER_B_BUTTON (A3)
 #define ENCODER_READ_INTERVAL 200 //microseconds
 #define STEPS_PER_CLICK 300
-#define DIRECTION_CHANGE_DELAY 40
 #define ENCODER_BEHAVIOR 1 // if 0: PEN_ON applyed as long as the user press, if 1: each press will toggle the pen state
-
-// SERVO
-#define SERVO_COMMAND_PIN (13)
-#define PEN_ON 0
-#define PEN_OFF 30
 
 //UV
 #define UV_PIN 7
@@ -72,55 +71,46 @@
 #define UV_OFF 0
 
 
-
-
-
-
 // SYSTEM CONFIGURATIONS
 #define STEP_PULSE_LENGTH 20
 #define STEPS_RATE 1500
-#define X_STEPS_PER_MM (10)
-#define Y_STEPS_PER_MM (7.6)
 
 // SOFT LIMITS SETTINGS
-#define ENABLE_SOFT_LIMIT 1 // uncomment to disable soft limits
+// #define ENABLE_SOFT_LIMIT 1 // uncomment to disable soft limits
 #define AUTO_HOME_STEPS_RATE 1200
 
-#define X_MM_HOMING_OFFSET (-330)
-#define Y_MM_HOMING_OFFSET (-330)
+#define X_HOMING_OFFSET 900
+#define Y_HOMING_OFFSET (-550)
+// mini setup of xy 
+// #define X_HOMING_OFFSET 90
+// #define Y_HOMING_OFFSET (-55)
 
-#define Y_MM_MIN_LIMIT (-300)
-#define X_MM_MIN_LIMIT (-290)
-#define Y_MM_MAX_LIMIT 230
-#define X_MM_MAX_LIMIT 310
-
-#define X_MM_RAIL_LENGTH (-X_MM_MIN_LIMIT + X_MM_MAX_LIMIT)
-#define Y_MM_RAIL_LENGTH (-Y_MM_MIN_LIMIT + Y_MM_MAX_LIMIT)
+//polar dims
+#define Y_MIN_LIMIT (-5000)
+#define X_MIN_LIMIT (-8500)
+#define Y_MAX_LIMIT 5000
+#define X_MAX_LIMIT 7800
+// cartesian dimensions
+// #define Y_MIN_LIMIT (-500)
+// #define X_MIN_LIMIT (-850)
+// #define Y_MAX_LIMIT 500
+// #define X_MAX_LIMIT 780
+// dims for mini setup of XY
+// #define Y_MIN_LIMIT (-50)
+// #define X_MIN_LIMIT (-85)
+// #define Y_MAX_LIMIT 50
+// #define X_MAX_LIMIT 78
+#define STEPPER_X_STEPSIZE 4
+#define STEPPER_Y_STEPSIZE 4
 
 // AUTO PRINTING
 #define PENDING_TIME (1000000 * 180)
 #define PEN_PENDING_TIME (1000000 * 3)
-
-#define steps_to_mm(steps, ratio) (steps / ratio)
-#define mm_to_steps(mm, ratio) (mm * ratio)
 
 template <typename T>
 int sgn(T val)
 {
   return (T(0) < val) - (val < T(0));
 }
-
-enum State
-{
-  IDLE,
-  MOVE,
-  PRINT
-};
-
-struct sys_state
-{
-  State sys_mode;
-  long unsigned last_move_time_stamp;
-};
 
 #endif

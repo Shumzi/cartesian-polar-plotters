@@ -60,10 +60,10 @@ void display_step()
 {
   display.clearDisplay();
   display.setCursor(0, 0);
-  display.print("X = ");
-  display.println(Current_Steps[0]);
-  display.print("Y = ");
-  display.println(Current_Steps[1]);
+  // display.print("X = ");
+  // display.println(Current_Steps[0]);
+  // display.print("Y = ");
+  // display.println(Current_Steps[1]);
   display.print("A = ");
   display.println(Current_Encoder_A_Count);
   display.print("B = ");
