@@ -58,6 +58,11 @@ class Encoder{
   * @retun true one of the encoders is currently pressed.
   */
   bool is_pressed();
+
+  /**
+  * reset the counter to zero.
+  */
+  void reset_counter();
   };
 
 

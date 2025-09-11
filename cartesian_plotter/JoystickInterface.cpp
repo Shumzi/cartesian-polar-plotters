@@ -41,6 +41,10 @@ void Encoder::set_direction(){
     }
   }
 
+void Encoder::reset_counter(){
+  counter_ = 0;
+}
+
 void Encoder::print_current_counter(){
   Serial.print("Encoder ");
   Serial.print(encoder_char_);

@@ -48,33 +48,42 @@ void cartesian_auto_homing()
     stepper_y.setCurrentPosition(0);
 }
 
-void move_to_switch (AccelStepper as, int pin_no)
+void move_to_switches()
 {
-    float acc = as.acceleration();
-    float max_speed = as.maxSpeed();
-    as.setAcceleration(500);
-    as.setMaxSpeed(500);
-    as.moveTo(-5000);
-    while(digitalRead(pin_no))
+    float max_speed_x = stepper_x.maxSpeed();
+    float max_speed_y = stepper_y.maxSpeed();
+    
+    stepper_x.setMaxSpeed(500);
+    stepper_y.setMaxSpeed(500);
+    stepper_x.moveTo(-5000);
+    stepper_y.moveTo(-5000);
+    
+    while(digitalRead(X_LIMIT_SW_PIN) || digitalRead(Y_LIMIT_SW_PIN))
     {
-        as.run();
+        if(digitalRead(X_LIMIT_SW_PIN))
+            stepper_x.run();
+        if(digitalRead(Y_LIMIT_SW_PIN))
+            stepper_y.run();
     }
-    as.setCurrentPosition(0);
-    as.moveTo(0);
-    as.setAcceleration(acc);
-    as.setMaxSpeed(max_speed);
-
+    stepper_x.setCurrentPosition(0);
+    stepper_x.moveTo(0);
+    stepper_x.setMaxSpeed(max_speed_x);
+    stepper_y.setCurrentPosition(0);
+    stepper_y.moveTo(0);
+    stepper_y.setMaxSpeed(max_speed_y);
 }
 void polar_extra_setup_and_auto_homing()
 {
     pinMode(X_LIMIT_SW_PIN, INPUT_PULLUP);
     pinMode(Y_LIMIT_SW_PIN, INPUT_PULLUP);
     stepper_x.moveTo(3000);
-    stepper_x.runToPosition();
     stepper_y.moveTo(3000);
-    stepper_y.runToPosition();
-    move_to_switch(stepper_x, X_LIMIT_SW_PIN);
-    move_to_switch(stepper_y, Y_LIMIT_SW_PIN);
+    while(stepper_x.run() || stepper_y.run())
+    {
+        stepper_x.run();
+        stepper_y.run();
+    }
+    move_to_switches();
     stepper_x.setCurrentPosition(0);
     stepper_y.setCurrentPosition(0);
     
@@ -132,6 +141,32 @@ void print_when_press(Encoder enc_1, Encoder enc_2)
         is_pressed = false;
     }
 }
+
+void home_when_press(Encoder enc)
+{
+        static bool is_pressed = false;
+    if(enc.is_pressed())
+    {
+        if(!is_pressed)
+        {
+            stepper_x.moveTo(0);
+            stepper_y.moveTo(0);
+            while(stepper_x.run() || stepper_y.run())
+            {
+                stepper_x.run();
+                stepper_y.run();
+            }
+            encoder_x.reset_counter();
+            encoder_y.reset_counter();
+        }
+        is_pressed = true;
+    }
+    else
+    {
+        is_pressed = false;
+    }
+}
+
 void update_uv_movement()
 {
     time_last_action = micros();
@@ -158,7 +193,7 @@ void loop()
 
     // update_UV(encoder_x, encoder_y);
     print_when_press(encoder_x, encoder_y);
-
+    home_when_press(encoder_x);
     // calculate move X
     if(current_x_pos != new_x_pos && new_x_pos > X_MIN_LIMIT + 5 && new_x_pos < X_MAX_LIMIT - 5)
     {   
