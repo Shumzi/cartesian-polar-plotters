@@ -91,3 +91,18 @@ void read_encoder_long_press(Encoder &encoder_a, Encoder &encoder_b, int *UV_sta
    
 
 }
+
+/**
+given the current lengths of the belts 
+*/
+Point calc_xy_from_polar(float l1, float l2)
+{
+  const float d = DIST_BETWEEN_MOTORS;
+  if (l1 + l2 <= d || fabs(l1 - l2) >= d)
+    raise ValueError("No intersection: lengths incompatible");
+  float x = (l1*l1 - l2*l2 + d*d) / (2.0f * d);
+  float r2 = l1*l1 - x*x;
+  if (r2 < -1e-6) return false;
+  float y = sqrt(max(0.0f, r2));
+  return Point(x,y);
+}

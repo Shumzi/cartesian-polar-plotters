@@ -96,6 +96,7 @@
 #define X_MIN_LIMIT (-8500)
 #define Y_MAX_LIMIT 5000
 #define X_MAX_LIMIT 5000
+#define DIST_BETWEEN_MOTORS 100
 // cartesian dimensions
 // #define Y_MIN_LIMIT (-500)
 // #define X_MIN_LIMIT (-850)
@@ -118,5 +119,7 @@ int sgn(T val)
 {
   return (T(0) < val) - (val < T(0));
 }
+
+struct Point { float x, y; };
 
 #endif
